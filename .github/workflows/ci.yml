@@ -5,6 +5,8 @@ on:
     paths-ignore:
       - 'wiki/**'
       - 'wiki_static/**'
+    # branches-ignore:
+    #   - gh-docker-registry
 
 jobs:
   build:
