@@ -6,6 +6,9 @@ on:
       - 'docker/**'
       - .github/workflows/docker.yml
   
+env:
+    DOCKER_IMAGE: flipper-zero/flipperzero-firmware-community
+
 jobs:
   lint:
     runs-on: ubuntu-latest
