@@ -6,8 +6,8 @@ on:
       - 'docker/**'
       - .github/workflows/docker.yml
   
-env:
-    DOCKER_IMAGE: flipper-zero/flipperzero-firmware-community
+# env:
+#     DOCKER_IMAGE: flipper-zero/flipperzero-firmware-community
 
 jobs:
   lint:
@@ -29,7 +29,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: docker/
+          context: flipper-zero/flipperzero-firmware-community
           file: docker/Dockerfile
           push: true
-          tags: flipper-zero/flipperzero-firmware-community:latest
+          tags: app:latest
