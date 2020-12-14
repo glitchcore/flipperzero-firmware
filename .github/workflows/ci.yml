@@ -7,8 +7,8 @@ on:
       - 'wiki_static/**'
 
 jobs:
-  test_job:
-    # runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-20.04
     container:
       image: ghcr.io/flipper-zero/flipperzero-firmware-community:latest
       credentials:
@@ -21,6 +21,12 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+
+      - name: Test ls
+        run: ls -la
+
+      - name: Test LSB release
+        run: lsb_release -a
 
   # build:
   #   runs-on: ubuntu-latest
