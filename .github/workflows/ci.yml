@@ -44,7 +44,7 @@ jobs:
         run: docker run ghcr.io/flipper-zero/flipperzero-firmware-community:latest /bin/bash -c "/syntax_check.sh" 
       
       - name: Run test
-        run: docker run make -C firmware TARGET=local APP_TEST=1 run
+        run: docker run ghcr.io/flipper-zero/flipperzero-firmware-community:latest /bin/bash -c "make -C firmware TARGET=local APP_TEST=1 run"
 
   # build:
   #   runs-on: ubuntu-latest
