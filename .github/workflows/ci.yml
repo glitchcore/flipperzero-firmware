@@ -40,7 +40,7 @@ jobs:
         run: lsb_release -a
 
       - name: Check syntax
-        uses: flipper-zero/flipperzero-firmware-community:latest
+        uses: docker://ghcr.io/flipper-zero/flipperzero-firmware-community:latest
         continue-on-error: false
         with:
           run: /syntax_check.sh
