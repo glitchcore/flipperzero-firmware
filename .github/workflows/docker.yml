@@ -7,7 +7,7 @@ on:
       - .github/workflows/docker.yml
   
 jobs:
-  lint:
+  image-build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
