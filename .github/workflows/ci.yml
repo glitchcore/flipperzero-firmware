@@ -10,241 +10,204 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
-    # container:
-    #   image: ghcr.io/flipper-zero/flipperzero-firmware-community:latest
-    #   credentials:
-    #       username: ${{ secrets.DOCKER_LOGIN }}
-    #       password: ${{ secrets.DOCKER_TOKEN }}
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Login to Github Container Registry
-        uses: docker/login-action@v1 
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.DOCKER_LOGIN }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-          
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           submodules: true
-
-      - name: Test ls
-        run: ls -la
-
-      - name: Test LSB release
-        run: lsb_release -a
-
-      - name: Pull image
-        run: docker pull ghcr.io/flipper-zero/flipperzero-firmware-community:latest
+      - uses: satackey/action-docker-layer-caching@v0.0.8
+        continue-on-error: true
+        with:
+          key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
+          restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
+      - name: Build docker image
+        uses: ./.github/actions/docker
 
       - name: Check syntax
-        run: docker run ghcr.io/flipper-zero/flipperzero-firmware-community:latest /bin/bash -c "/syntax_check.sh" 
-      
+        uses: ./.github/actions/docker
+        continue-on-error: false
+        with:
+          run: /syntax_check.sh
+
+      - name: Build F2 bootloader in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C bootloader TARGET=f2
+
+      - name: Publish F2 bootloader artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: bootloader_f2
+          path: |
+            bootloader/.obj/f2/bootloader.elf
+            bootloader/.obj/f2/bootloader.bin
+            bootloader/.obj/f2/bootloader.hex
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build local testing firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=local
+
       - name: Run local tests
-        run: docker run ghcr.io/flipper-zero/flipperzero-firmware-community:latest /bin/bash -c "make -C firmware TARGET=locall APP_TEST=1 run"
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=local APP_TEST=1 run
 
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-  #         submodules: true
-  #     - uses: satackey/action-docker-layer-caching@v0.0.8
-  #       continue-on-error: true
-  #       with:
-  #         key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
-  #         restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
-  #     - name: Build docker image
-  #       uses: ./.github/actions/docker
+      - name: Build F2 firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=f2 APP_RELEASE=1
 
-  #     - name: Check syntax
-  #       uses: ./.github/actions/docker
-  #       continue-on-error: false
-  #       with:
-  #         run: /syntax_check.sh
+      - name: Publish F2 firmware artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: firmware_f2
+          path: |
+            firmware/.obj/f2/firmware.elf
+            firmware/.obj/f2/firmware.bin
+            firmware/.obj/f2/firmware.hex
+          if-no-files-found: error
+          retention-days: 7
 
-  #     - name: Build F2 bootloader in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C bootloader TARGET=f2
+      - name: Build F3 bootloader in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C bootloader TARGET=f3
 
-  #     - name: Publish F2 bootloader artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: bootloader_f2
-  #         path: |
-  #           bootloader/.obj/f2/bootloader.elf
-  #           bootloader/.obj/f2/bootloader.bin
-  #           bootloader/.obj/f2/bootloader.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
+      - name: Publish F3 bootloader artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: bootloader_f3
+          path: |
+            bootloader/.obj/f3/bootloader.elf
+            bootloader/.obj/f3/bootloader.bin
+            bootloader/.obj/f3/bootloader.hex
+          if-no-files-found: error
+          retention-days: 7
 
-  #     - name: Build local testing firmware in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=local
+      - name: Build F3 firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=f3 APP_RELEASE=1
 
-  #     - name: Run local tests
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=local APP_TEST=1 run
+      - name: Publish F3 firmware artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: firmware_f3
+          path: |
+            firmware/.obj/f3/firmware.elf
+            firmware/.obj/f3/firmware.bin
+            firmware/.obj/f3/firmware.hex
+          if-no-files-found: error
+          retention-days: 7
 
-  #     - name: Build F2 firmware in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=f2 APP_RELEASE=1
+  upload:
+    name: Upload artifacts to external storage
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get bootloader
+        uses: actions/download-artifact@v2
+        with:
+          name: bootloader_f3
+          path: bootloader
+      - name: Get firmware
+        uses: actions/download-artifact@v2
+        with:
+          name: firmware_f3
+          path: firmware
+      - name: Upload bootloader
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: bootloader
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+      - name: Upload firmware
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: firmware
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
 
-  #     - name: Publish F2 firmware artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: firmware_f2
-  #         path: |
-  #           firmware/.obj/f2/firmware.elf
-  #           firmware/.obj/f2/firmware.bin
-  #           firmware/.obj/f2/firmware.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
+  fullfirmware:
+    name: Create latest full firmware
+    needs: upload
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get bootloader
+        uses: actions/download-artifact@v2
+        with:
+          name: bootloader_f3
+          path: bootloader
+      - name: Get firmware
+        uses: actions/download-artifact@v2
+        with:
+          name: firmware_f3
+          path: firmware 
+      - name: cp 
+        run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
+      - name: truncate 
+        run: truncate -s 32768 full_firmware_latest.bin
+      - name: cat 
+        run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
+      - name: ls 
+        run: ls -R
+      - name: Upload fullfirmware
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: full_firmware_latest.bin
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
 
-  #     - name: Build F3 bootloader in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C bootloader TARGET=f3
-
-  #     - name: Publish F3 bootloader artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: bootloader_f3
-  #         path: |
-  #           bootloader/.obj/f3/bootloader.elf
-  #           bootloader/.obj/f3/bootloader.bin
-  #           bootloader/.obj/f3/bootloader.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
-
-  #     - name: Build F3 firmware in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=f3 APP_RELEASE=1
-
-  #     - name: Publish F3 firmware artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: firmware_f3
-  #         path: |
-  #           firmware/.obj/f3/firmware.elf
-  #           firmware/.obj/f3/firmware.bin
-  #           firmware/.obj/f3/firmware.hex
-  #         if-no-files-found: error
-  #         retention-days: 7
-
-  # upload:
-  #   name: Upload artifacts to external storage
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Get bootloader
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: bootloader_f3
-  #         path: bootloader
-  #     - name: Get firmware
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: firmware_f3
-  #         path: firmware
-  #     - name: Upload bootloader
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -avzp --delete
-  #         path: bootloader
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
-  #     - name: Upload firmware
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -avzp --delete
-  #         path: firmware
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
-
-  # fullfirmware:
-  #   name: Create latest full firmware
-  #   needs: upload
-  #   if: github.ref == 'refs/heads/master'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Get bootloader
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: bootloader_f3
-  #         path: bootloader
-  #     - name: Get firmware
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: firmware_f3
-  #         path: firmware 
-  #     - name: cp 
-  #       run: cp ./bootloader/bootloader.bin full_firmware_latest.bin
-  #     - name: truncate 
-  #       run: truncate -s 32768 full_firmware_latest.bin
-  #     - name: cat 
-  #       run: cat ./firmware/firmware.bin >> full_firmware_latest.bin
-  #     - name: ls 
-  #       run: ls -R
-  #     - name: Upload fullfirmware
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -avzp --delete
-  #         path: full_firmware_latest.bin
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
-
-  # genpic:
-  #   name: Generate pic
-  #   needs: fullfirmware
-  #   if: github.ref == 'refs/heads/master'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-  #         ref: master 
-  #         submodules: true      
-  #     - name: Set test env
-  #       run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
-  #     - name: Test output NUMBER_OF_COMMITS
-  #       run: echo $NUMBER_OF_COMMITS
-  #     - name: Test output date
-  #       run: |
-  #         GET_DATE=$(date +"%b %d")
-  #         PREP_DATE=$(echo "${GET_DATE^^}")
-  #         echo "PREP_DATE=$PREP_DATE" >> $GITHUB_ENV
-  #     - name: Test output PREP_DATE
-  #       run: echo $PREP_DATE          
-  #     - name: Gen pic
-  #       run: convert ./.github/assets/latest-firmware-template.png -font ./.github/assets/Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "$NUMBER_OF_COMMITS $PREP_DATE" latest-firmware-banner.png
-  #     - name: Upload pic
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -avzp --delete
-  #         path: latest-firmware-banner.png
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+  genpic:
+    name: Generate pic
+    needs: fullfirmware
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: master 
+          submodules: true      
+      - name: Set test env
+        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+      - name: Test output NUMBER_OF_COMMITS
+        run: echo $NUMBER_OF_COMMITS
+      - name: Test output date
+        run: |
+          GET_DATE=$(date +"%b %d")
+          PREP_DATE=$(echo "${GET_DATE^^}")
+          echo "PREP_DATE=$PREP_DATE" >> $GITHUB_ENV
+      - name: Test output PREP_DATE
+        run: echo $PREP_DATE          
+      - name: Gen pic
+        run: convert ./.github/assets/latest-firmware-template.png -font ./.github/assets/Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "$NUMBER_OF_COMMITS $PREP_DATE" latest-firmware-banner.png
+      - name: Upload pic
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: latest-firmware-banner.png
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
