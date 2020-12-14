@@ -28,8 +28,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          # repository: Flipper-Zero/flipperzero-firmware-community
-          # token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
           fetch-depth: 0
           submodules: true
 
@@ -39,11 +37,11 @@ jobs:
       - name: Test LSB release
         run: lsb_release -a
 
+      - name: Pull image
+        run: docker pull ghcr.io/flipper-zero/flipperzero-firmware-community:latest
+
       - name: Check syntax
-        uses: docker://ghcr.io/flipper-zero/flipperzero-firmware-community:latest
-        continue-on-error: false
-        with:
-          run: /syntax_check.sh
+        run: docker run ghcr.io/flipper-zero/flipperzero-firmware-community:latest /bin/bash -c "/syntax_check.sh" 
 
   # build:
   #   runs-on: ubuntu-latest
