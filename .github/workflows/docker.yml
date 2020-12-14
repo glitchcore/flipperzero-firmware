@@ -29,4 +29,4 @@ jobs:
           context: docker/
           file: docker/Dockerfile
           push: true
-          tags: app:latest
+          tags: flipper-zero/flipperzero-firmware-community:latest
