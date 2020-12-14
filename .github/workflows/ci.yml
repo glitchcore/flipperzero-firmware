@@ -32,6 +32,12 @@ jobs:
       - name: Test LSB release
         run: lsb_release -a
 
+      - name: Check syntax
+        uses: ./.github/actions/docker
+        continue-on-error: false
+        with:
+          run: /syntax_check.sh
+
   # build:
   #   runs-on: ubuntu-latest
   #   steps:
