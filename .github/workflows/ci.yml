@@ -34,8 +34,7 @@ jobs:
 
       - name: Check syntax
         continue-on-error: false
-        with:
-          run: /syntax_check.sh
+        run: /syntax_check.sh
 
   # build:
   #   runs-on: ubuntu-latest
