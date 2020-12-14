@@ -16,12 +16,6 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          submodules: true
-
       - name: Test ls
         run: ls -la
 
