@@ -29,7 +29,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: flipper-zero/flipperzero-firmware-community
+          context: docker/
           file: docker/Dockerfile
           push: true
-          tags: app:latest
+          tags: ghcr.io/flipper-zero/flipperzero-firmware-community:latest
