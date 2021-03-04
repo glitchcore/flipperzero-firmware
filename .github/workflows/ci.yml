@@ -8,11 +8,21 @@ on:
 
 env:
   TARGET_VERSION: f5
+  GITHUB_WORKSPACE: /tmp/${GITHUB_RUN_ID}
 
 jobs:
   build:
     runs-on: [self-hosted]
     steps:
+      - name: make workspace dir
+        run: mkdir -p ${GITHUB_WORKSPACE}
+
+      - name: echo env variables
+        run: echo ${GITHUB_RUN_ID}
+
+      - name: test ls
+        run: pwd ${GITHUB_WORKSPACE}
+
       - name: Cleanup workspace
         uses: AutoModality/action-clean@v1
 
@@ -157,3 +167,10 @@ jobs:
           remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
           remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
           remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+
+  clear_workspace:
+    name: Clear workspace
+    runs-on: [self-hosted]
+    steps:
+      - name: rm
+        run: rm -rfv ${GITHUB_WORKSPACE}/*
