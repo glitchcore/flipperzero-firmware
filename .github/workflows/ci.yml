@@ -23,18 +23,22 @@ jobs:
   build:
     runs-on: [self-hosted]
     needs: create_workspace
+    env:
+      CLONE_DIR: ${{ github.workspace }}/${GITHUB_RUN_ID}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           submodules: true
-          path: "${GITHUB_RUN_ID}"
+          path: ${{ env.CLONE_DIR }}
 
       - name: debug 2 workspace
         run: |
           echo "GITHUB_RUN_ID = ${GITHUB_RUN_ID}"
           ls -la ${GITHUB_RUN_ID}
+          ls -la ${{ env.CLONE_DIR }}
+          ls -la ${{ github.workspace }}/${GITHUB_RUN_ID}
 
   # build:
   #   runs-on: [self-hosted]
