@@ -24,14 +24,14 @@ jobs:
     runs-on: [self-hosted]
     needs: create_workspace
     env:
-      CLONE_DIR: ${{ github.workspace }}/${GITHUB_RUN_ID}
+      DOC_ROOT: ${{ github.workspace }}/FOO/ACE
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           submodules: true
-          path: ${{ env.CLONE_DIR }}
+          path: ${{ env.DOC_ROOT }}
 
       - name: debug 2 workspace
         run: |
