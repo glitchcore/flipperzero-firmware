@@ -11,15 +11,6 @@ env:
   WORK_DIR: ${{ github.workspace }}/${{ github.run_id }}
 
 jobs:
-  # create_workspace:
-  #   runs-on: [self-hosted]
-  #   steps:
-  #     - name: debug workspace
-  #       run: | 
-  #         echo ${{ github.run_id }}
-  #         mkdir -p ${{ github.run_id }}
-  #         ls -la ${{ github.run_id }}
-
   build:
     runs-on: [self-hosted]
     # needs: create_workspace
@@ -37,154 +28,163 @@ jobs:
           ls -la ${{ github.run_id }}
           ls -la ${{ github.workspace }}/${{ github.run_id }}
 
-  # build:
-  #   runs-on: [self-hosted]
-  #   needs: create_workspace
-  #   steps:
-  #     - name: Cleanup workspace
-  #       uses: AutoModality/action-clean@v1
+  build:
+    runs-on: [self-hosted]
+    needs: create_workspace
+    steps:
+      - name: Cleanup workspace
+        uses: AutoModality/action-clean@v1
 
-  #     - name: Checkout code
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 0
-  #         submodules: true
-  #     - uses: satackey/action-docker-layer-caching@v0.0.11
-  #       continue-on-error: true
-  #       with:
-  #         key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
-  #         restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
-  #     - name: Build docker image
-  #       uses: ./.github/actions/docker
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: true
+          path: ${{ env.WORK_DIR }}
 
-  #     - name: Check syntax
-  #       uses: ./.github/actions/docker
-  #       continue-on-error: false
-  #       with:
-  #         run: /syntax_check.sh
+      - name: change work dir
+        run: cd ${{ env.WORK_DIR }}
 
-  #     - name: Build bootloader in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C bootloader TARGET=${TARGET_VERSION}
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
+        with:
+          key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
+          restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
+      - name: Build docker image
+        uses: ./.github/actions/docker
 
-  #     - name: Generate dfu file for bootloader
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: hex2dfu -i bootloader/.obj/${TARGET_VERSION}/bootloader.hex -o bootloader/.obj/${TARGET_VERSION}/bootloader.dfu
+      - name: Check syntax
+        uses: ./.github/actions/docker
+        continue-on-error: false
+        with:
+          run: /syntax_check.sh
 
-  #     - name: Build firmware in docker
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: make -C firmware TARGET=${TARGET_VERSION} APP_RELEASE=1
+      - name: Build bootloader in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C bootloader TARGET=${TARGET_VERSION}
 
-  #     - name: Generate dfu file for firmware
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: hex2dfu -i firmware/.obj/${TARGET_VERSION}/firmware.hex -o firmware/.obj/${TARGET_VERSION}/firmware.dfu
+      - name: Generate dfu file for bootloader
+        uses: ./.github/actions/docker
+        with:
+          run: hex2dfu -i bootloader/.obj/${TARGET_VERSION}/bootloader.hex -o bootloader/.obj/${TARGET_VERSION}/bootloader.dfu
 
-  #     - name: Generate full hex file
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: srec_cat bootloader/.obj/${TARGET_VERSION}/bootloader.hex -Intel firmware/.obj/${TARGET_VERSION}/firmware.hex -Intel -o full.hex -Intel
+      - name: Build firmware in docker
+        uses: ./.github/actions/docker
+        with:
+          run: make -C firmware TARGET=${TARGET_VERSION} APP_RELEASE=1
 
-  #     - name: Move upload files
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: |
-  #           mv bootloader/.obj/${TARGET_VERSION}/bootloader.dfu bootloader.dfu
-  #           mv bootloader/.obj/${TARGET_VERSION}/bootloader.bin bootloader.bin
-  #           mv firmware/.obj/${TARGET_VERSION}/firmware.dfu firmware.dfu
-  #           mv firmware/.obj/${TARGET_VERSION}/firmware.bin firmware.bin
+      - name: Generate dfu file for firmware
+        uses: ./.github/actions/docker
+        with:
+          run: hex2dfu -i firmware/.obj/${TARGET_VERSION}/firmware.hex -o firmware/.obj/${TARGET_VERSION}/firmware.dfu
 
-  #     - name: Generate full dfu file
-  #       uses: ./.github/actions/docker
-  #       with:
-  #         run: hex2dfu -i full.hex -o full.dfu
+      - name: Generate full hex file
+        uses: ./.github/actions/docker
+        with:
+          run: srec_cat bootloader/.obj/${TARGET_VERSION}/bootloader.hex -Intel firmware/.obj/${TARGET_VERSION}/firmware.hex -Intel -o full.hex -Intel
 
-  #     - name: Copy bootloader for full.bin 
-  #       run: cp bootloader.bin full.bin
-  #     - name: Truncate full.bin 
-  #       run: truncate -s 32768 full.bin
-  #     - name: Add firmware.bin at full.bin
-  #       run: cat firmware.bin >> full.bin
+      - name: Move upload files
+        uses: ./.github/actions/docker
+        with:
+          run: |
+            mv bootloader/.obj/${TARGET_VERSION}/bootloader.dfu bootloader.dfu
+            mv bootloader/.obj/${TARGET_VERSION}/bootloader.bin bootloader.bin
+            mv firmware/.obj/${TARGET_VERSION}/firmware.dfu firmware.dfu
+            mv firmware/.obj/${TARGET_VERSION}/firmware.bin firmware.bin
 
-  #     - name: Publish artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: artifacts
-  #         path: |
-  #           bootloader.dfu
-  #           bootloader.bin
-  #           firmware.dfu
-  #           firmware.bin
-  #           full.dfu
-  #           full.bin
-  #         if-no-files-found: error
-  #         retention-days: 7
+      - name: Generate full dfu file
+        uses: ./.github/actions/docker
+        with:
+          run: hex2dfu -i full.hex -o full.dfu
 
-  # upload:
-  #   name: Upload artifacts to external storage
-  #   needs: build
-  #   runs-on: [self-hosted]
-  #   steps:
+      - name: Copy bootloader for full.bin 
+        run: cp bootloader.bin full.bin
+      - name: Truncate full.bin 
+        run: truncate -s 32768 full.bin
+      - name: Add firmware.bin at full.bin
+        run: cat firmware.bin >> full.bin
 
-  #     - name: Make empty dir
-  #       run: mkdir -p empty
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: |
+            bootloader.dfu
+            bootloader.bin
+            firmware.dfu
+            firmware.bin
+            full.dfu
+            full.bin
+          if-no-files-found: error
+          retention-days: 7
 
-  #     - name: Clear upload dir
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -cvzr --delete
-  #         path: empty/
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}        
+  upload:
+    name: Upload artifacts to external storage
+    needs: build
+    runs-on: [self-hosted]
+    steps:
+      - name: change work dir
+        run: cd ${{ env.WORK_DIR }}
 
-  #     - name: Generate files list
-  #       run: ls bootloader.dfu firmware.dfu full.dfu bootloader.bin firmware.bin full.bin > uploadlist.txt
+      - name: Make empty dir
+        run: mkdir -p empty
 
-  #     - name: Upload artifacts
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -cvzr --delete --files-from=uploadlist.txt
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+      - name: Clear upload dir
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -cvzr --delete
+          path: empty/
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}        
 
-  # genpic:
-  #   name: Generate pic
-  #   needs: upload
-  #   if: github.ref == 'refs/heads/master'
-  #   runs-on: [self-hosted]
-  #   steps:
-  #     - name: Set test env
-  #       run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
-  #     - name: Test output NUMBER_OF_COMMITS
-  #       run: echo $NUMBER_OF_COMMITS
-  #     - name: Test output date
-  #       run: |
-  #         GET_DATE=$(date +"%b %d")
-  #         PREP_DATE=$(echo "${GET_DATE^^}")
-  #         echo "PREP_DATE=$PREP_DATE" >> $GITHUB_ENV
-  #     - name: Test output PREP_DATE
-  #       run: echo $PREP_DATE          
-  #     - name: Gen pic
-  #       run: convert ./.github/assets/latest-firmware-template.png -font ./.github/assets/Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "$NUMBER_OF_COMMITS $PREP_DATE" latest-firmware-banner.png
-  #     - name: Upload pic
-  #       uses: burnett01/rsync-deployments@4.1
-  #       with:
-  #         switches: -avzp --delete
-  #         path: latest-firmware-banner.png
-  #         remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
-  #         remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-  #         remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-  #         remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-  #         remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+      - name: Generate files list
+        run: ls bootloader.dfu firmware.dfu full.dfu bootloader.bin firmware.bin full.bin > uploadlist.txt
+
+      - name: Upload artifacts
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -cvzr --delete --files-from=uploadlist.txt
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${GITHUB_REF##*/}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
+
+  genpic:
+    name: Generate pic
+    needs: upload
+    if: github.ref == 'refs/heads/master'
+    runs-on: [self-hosted]
+    steps:
+      - name: change work dir
+        run: cd ${{ env.WORK_DIR }}
+      - name: Set test env
+        run: echo "NUMBER_OF_COMMITS=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+      - name: Test output NUMBER_OF_COMMITS
+        run: echo $NUMBER_OF_COMMITS
+      - name: Test output date
+        run: |
+          GET_DATE=$(date +"%b %d")
+          PREP_DATE=$(echo "${GET_DATE^^}")
+          echo "PREP_DATE=$PREP_DATE" >> $GITHUB_ENV
+      - name: Test output PREP_DATE
+        run: echo $PREP_DATE          
+      - name: Gen pic
+        run: convert ./.github/assets/latest-firmware-template.png -font ./.github/assets/Born2bSportyV2.ttf -weight 700 -pointsize 140 -annotate +900+330 "$NUMBER_OF_COMMITS $PREP_DATE" latest-firmware-banner.png
+      - name: Upload pic
+        uses: burnett01/rsync-deployments@4.1
+        with:
+          switches: -avzp --delete
+          path: latest-firmware-banner.png
+          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}/"
+          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
+          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
+          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
+          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
 
   # clear_workspace:
   #   name: Clear workspace
