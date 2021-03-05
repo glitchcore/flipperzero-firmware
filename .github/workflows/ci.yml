@@ -8,7 +8,6 @@ on:
 
 env:
   TARGET_VERSION: f5
-  # WORK_DIR: ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/
 
 jobs:
   create_workspace:
@@ -16,15 +15,15 @@ jobs:
     steps:
       - name: debug workspace
         run: | 
-          echo ${GITHUB_RUN_ID}
-          mkdir -p ${GITHUB_RUN_ID}
-          ls -la ${GITHUB_RUN_ID}
+          echo ${{ github.run_id }}
+          mkdir -p ${{ github.run_id }}
+          ls -la ${{ github.run_id }}
 
   build:
     runs-on: [self-hosted]
     needs: create_workspace
     env:
-      DOC_ROOT: ${{ github.workspace }}/FOO/ACE
+      DOC_ROOT: ${{ github.workspace }}/${{ github.run_id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -35,10 +34,9 @@ jobs:
 
       - name: debug 2 workspace
         run: |
-          echo "GITHUB_RUN_ID = ${GITHUB_RUN_ID}"
-          ls -la ${GITHUB_RUN_ID}
-          ls -la ${{ env.CLONE_DIR }}
-          ls -la ${{ github.workspace }}/${GITHUB_RUN_ID}
+          echo "GITHUB_RUN_ID = ${{ github.run_id }}"
+          ls -la ${{ github.run_id }}
+          ls -la ${{ github.workspace }}/${{ github.run_id }}
 
   # build:
   #   runs-on: [self-hosted]
