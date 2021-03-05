@@ -21,7 +21,7 @@ jobs:
         run: echo ${GITHUB_RUN_ID}
 
       - name: test ls
-        run: pwd ${{ github.workspace }}
+        run: ls -la ${{ github.workspace }}
 
 
   build:
