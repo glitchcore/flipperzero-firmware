@@ -8,7 +8,7 @@ on:
 
 env:
   TARGET_VERSION: f5
-  GITHUB_WORKSPACE: /tmp/${GITHUB_RUN_ID}
+  WORK_DIR: ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/
 
 jobs:
   create_workspace:
@@ -16,22 +16,24 @@ jobs:
     steps:
       - name: debug workspace
         run: | 
-          GITHUB_WORKSPACE="/tmp/${GITHUB_RUN_ID}"
-          echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
-          echo "github.workspace = ${{ github.workspace }}"
-          echo ${GITHUB_RUN_ID}
-          ls -la ${{ env.workspace }}
+          mkdir -p ${WORK_DIR}
+          ls -la ${WORK_DIR}
 
   build:
     runs-on: [self-hosted]
     needs: create_workspace
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: true
+          path: ${GITHUB_RUN_ID}
       - name: debug 2 workspace
         run: |
-          echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
-          echo "github.workspace = ${{ github.workspace }}"
-          echo ${GITHUB_RUN_ID}
-          ls -la ${{ env.workspace }}
+          echo "WORK_DIR = ${WORK_DIR}"
+          ls -la ${WORK_DIR}
+          ls -la ${GITHUB_RUN_ID}
 
   # build:
   #   runs-on: [self-hosted]
