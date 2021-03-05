@@ -13,23 +13,6 @@ env:
 jobs:
   build:
     runs-on: [self-hosted]
-    # needs: create_workspace
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          submodules: true
-          path: ${{ env.WORK_DIR }}
-
-      - name: debug 2 workspace
-        run: |
-          echo "GITHUB_RUN_ID = ${{ github.run_id }}"
-          ls -la ${{ github.run_id }}
-          ls -la ${{ github.workspace }}/${{ github.run_id }}
-
-  build:
-    runs-on: [self-hosted]
     needs: create_workspace
     steps:
       - name: Cleanup workspace
