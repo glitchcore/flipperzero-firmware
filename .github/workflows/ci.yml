@@ -13,7 +13,6 @@ env:
 jobs:
   build:
     runs-on: [self-hosted]
-    needs: create_workspace
     steps:
       - name: Cleanup workspace
         uses: AutoModality/action-clean@v1
