@@ -8,6 +8,7 @@ on:
 
 env:
   TARGET_VERSION: f5
+  WORK_DIR: ${{ github.workspace }}/${{ github.run_id }}
 
 jobs:
   create_workspace:
@@ -30,7 +31,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-          path: ${{ env.DOC_ROOT }}
+          path: ${{ env.WORK_DIR }}
 
       - name: debug 2 workspace
         run: |
