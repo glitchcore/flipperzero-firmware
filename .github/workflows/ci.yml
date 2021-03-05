@@ -14,8 +14,20 @@ jobs:
   create_workspace:
     runs-on: [self-hosted]
     steps:
-      - name: make workspace dir
+      - name: debug workspace
         run: | 
+          GITHUB_WORKSPACE = "/tmp/${GITHUB_RUN_ID}""
+          echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
+          echo "github.workspace = ${{ github.workspace }}"
+          echo ${GITHUB_RUN_ID}
+          ls -la ${{ env.workspace }}
+
+  build:
+    runs-on: [self-hosted]
+    needs: create_workspace
+    steps:
+      - name: debug 2 workspace
+        run: |
           echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
           echo "github.workspace = ${{ github.workspace }}"
           echo ${GITHUB_RUN_ID}
