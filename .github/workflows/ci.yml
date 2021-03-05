@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: debug workspace
         run: | 
-          GITHUB_WORKSPACE = "/tmp/${GITHUB_RUN_ID}""
+          GITHUB_WORKSPACE = "/tmp/${GITHUB_RUN_ID}"
           echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
           echo "github.workspace = ${{ github.workspace }}"
           echo ${GITHUB_RUN_ID}
