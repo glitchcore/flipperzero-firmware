@@ -29,7 +29,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-          path: ${GITHUB_RUN_ID}
+          path: "${GITHUB_RUN_ID}"
 
       - name: debug 2 workspace
         run: |
