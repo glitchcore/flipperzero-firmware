@@ -8,7 +8,7 @@ on:
 
 env:
   TARGET_VERSION: f5
-  WORK_DIR: ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/
+  # WORK_DIR: ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/
 
 jobs:
   create_workspace:
@@ -16,8 +16,9 @@ jobs:
     steps:
       - name: debug workspace
         run: | 
-          mkdir -p ${WORK_DIR}
-          ls -la ${WORK_DIR}
+          echo ${GITHUB_RUN_ID}
+          mkdir -p ${GITHUB_RUN_ID}
+          ls -la ${GITHUB_RUN_ID}
 
   build:
     runs-on: [self-hosted]
@@ -29,10 +30,10 @@ jobs:
           fetch-depth: 0
           submodules: true
           path: ${GITHUB_RUN_ID}
+
       - name: debug 2 workspace
         run: |
-          echo "WORK_DIR = ${WORK_DIR}"
-          ls -la ${WORK_DIR}
+          echo "GITHUB_RUN_ID = ${GITHUB_RUN_ID}"
           ls -la ${GITHUB_RUN_ID}
 
   # build:
