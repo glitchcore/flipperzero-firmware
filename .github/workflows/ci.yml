@@ -13,8 +13,8 @@ env:
 jobs:
   build:
     runs-on: [self-hosted]
-    env:
-        working-directory: ${{ github.run_id }}
+    # env:
+    #     working-directory: ${{ github.run_id }}
     steps:
       - name: Cleanup workspace
         uses: AutoModality/action-clean@v1
@@ -32,8 +32,14 @@ jobs:
           key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
           restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
 
-      # - name: Build docker image
-      #   uses: ./.github/actions/docker
+      - name: test echo
+        run: |
+         - echo ${{ env.WORK_DIR }}
+         - ${{ github.workspace }}
+         - ${{ github.run_id }}
+
+      - name: Build docker image
+        uses: ./.github/actions/docker
 
       # - name: Build Docker image
       #   working-directory: ${{ env.WORK_DIR }}
