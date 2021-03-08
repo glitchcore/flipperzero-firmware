@@ -38,7 +38,6 @@ jobs:
           echo ${{ github.workspace }}
           echo ${{ github.run_id }}
           pwd
-        # working-directory: ${{ env.WORK_DIR }}
 
       - name: Build docker image
         uses: ./.github/actions/docker
