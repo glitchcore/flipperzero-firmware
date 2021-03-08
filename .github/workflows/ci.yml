@@ -13,8 +13,8 @@ env:
 jobs:
   build:
     runs-on: [self-hosted]
-    env:
-        working-directory: ${{ env.WORK_DIR }}
+    # env:
+    #     working-directory: ${{ env.WORK_DIR }}
     steps:
       - name: Cleanup workspace
         uses: AutoModality/action-clean@v1
