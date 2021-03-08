@@ -40,7 +40,7 @@ jobs:
           pwd
 
       - name: Build docker image
-        uses: ${{ env.WORK_DIR }}/.github/actions/docker
+        uses: ${{ github.workspace }}/.github/actions/docker
 
       # - name: Build Docker image
       #   working-directory: ${{ env.WORK_DIR }}
