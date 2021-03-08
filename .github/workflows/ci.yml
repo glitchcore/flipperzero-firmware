@@ -35,9 +35,9 @@ jobs:
       # - name: Build docker image
       #   uses: ./.github/actions/docker
 
-      - name: Build Docker image
-        working-directory: ${{ env.WORK_DIR }}
-        run: docker build --file docker/Dockerfile  .
+      # - name: Build Docker image
+      #   working-directory: ${{ env.WORK_DIR }}
+      #   run: docker build --file docker/Dockerfile  .
 
       - name: Check syntax
         uses: ./.github/actions/docker
