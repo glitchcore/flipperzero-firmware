@@ -34,9 +34,10 @@ jobs:
 
       - name: test echo
         run: |
-         - echo ${{ env.WORK_DIR }}
-         - ${{ github.workspace }}
-         - ${{ github.run_id }}
+          echo ${{ env.WORK_DIR }}
+          echo ${{ github.workspace }}
+          echo ${{ github.run_id }}
+          pwd
 
       - name: Build docker image
         uses: ./.github/actions/docker
