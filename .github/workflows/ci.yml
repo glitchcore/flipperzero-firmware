@@ -34,7 +34,7 @@ jobs:
           key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
           restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
       - name: Build docker image
-        uses: .${RUN_ID}/.github/actions/docker
+        uses: ./.github/actions/docker
 
       - name: Check syntax
         uses: ./.github/actions/docker
