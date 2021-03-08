@@ -9,6 +9,7 @@ on:
 env:
   TARGET_VERSION: f5
   WORK_DIR: ${{ github.workspace }}/${{ github.run_id }}
+  RUN_ID: ${{ github.run_id }}
 
 jobs:
   build:
@@ -33,7 +34,7 @@ jobs:
           key: docker-cache-${{ hashFiles('docker/**') }}-{hash}
           restore-keys: docker-cache-${{ hashFiles('docker/**') }}-
       - name: Build docker image
-        uses: .${{ github.run_id }}/.github/actions/docker
+        uses: .${RUN_ID}/.github/actions/docker
 
       - name: Check syntax
         uses: ./.github/actions/docker
