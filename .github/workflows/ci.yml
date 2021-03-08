@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
-          path: ${{ env.WORK_DIR }}
+          # path: ${{ env.WORK_DIR }}
 
       - uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
@@ -40,7 +40,7 @@ jobs:
           pwd
 
       - name: Build docker image
-        uses: ${{ github.workspace }}/.github/actions/docker
+        uses: ./.github/actions/docker
 
       # - name: Build Docker image
       #   working-directory: ${{ env.WORK_DIR }}
