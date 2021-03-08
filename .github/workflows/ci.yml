@@ -13,8 +13,8 @@ env:
 jobs:
   build:
     runs-on: [self-hosted]
-    # env:
-    #     working-directory: ${{ github.run_id }}
+    env:
+        working-directory: ${{ env.WORK_DIR }}
     steps:
       - name: Cleanup workspace
         uses: AutoModality/action-clean@v1
@@ -38,7 +38,7 @@ jobs:
           echo ${{ github.workspace }}
           echo ${{ github.run_id }}
           pwd
-        working-directory: ${{ env.WORK_DIR }}
+        # working-directory: ${{ env.WORK_DIR }}
 
       - name: Build docker image
         uses: ./.github/actions/docker
