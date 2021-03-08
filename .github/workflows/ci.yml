@@ -9,13 +9,11 @@ on:
 env:
   TARGET_VERSION: f5
   WORK_DIR: ${{ github.workspace }}/${{ github.run_id }}
-  RUN_ID: ${{ github.run_id }}
 
 jobs:
   build:
     runs-on: [self-hosted]
-    defaults:
-      run:
+    env:
         working-directory: ${{ github.run_id }}
     steps:
       - name: Cleanup workspace
