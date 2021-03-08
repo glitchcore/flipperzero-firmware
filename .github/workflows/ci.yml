@@ -36,7 +36,7 @@ jobs:
       #   uses: ./.github/actions/docker
 
       - name: Build Docker image
-        run: docker build --file ../../docker/Dockerfile  .
+        run: docker build --file docker/Dockerfile  .
 
       - name: Check syntax
         uses: ./.github/actions/docker
