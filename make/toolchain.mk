@@ -12,6 +12,7 @@ LD	= $(PREFIX)g++
 AS	= $(PREFIX)gcc -x assembler-with-cpp
 CP	= $(PREFIX)objcopy
 SZ	= $(PREFIX)size
+AR  = $(PREFIX)ar rcs
 HEX	= $(CP) -O ihex
 BIN	= $(CP) -O binary -S
 

@@ -36,6 +36,7 @@ APP_ABOUT	= 1
 # Plugins
 APP_MUSIC_PLAYER = 1
 APP_USER_APP = 1
+APP_SNAKE_GAME = 1
 
 # Debug
 APP_ACCESSOR = 1
@@ -49,6 +50,7 @@ APP_DISPLAY_TEST = 1
 
 APP_USB_MOUSE = 1
 APP_BAD_USB = 1
+APP_UART_ECHO = 1
 endif
 
 
@@ -133,6 +135,11 @@ CFLAGS		+= -DAPP_USB_TEST
 SRV_GUI = 1
 endif
 
+APP_UART_ECHO ?= 0
+ifeq ($(APP_UART_ECHO), 1)
+CFLAGS		+= -DAPP_UART_ECHO
+SRV_GUI = 1
+endif
 
 APP_DISPLAY_TEST ?= 0
 ifeq ($(APP_DISPLAY_TEST), 1)
@@ -186,7 +193,11 @@ CFLAGS		+= -DAPP_USER_APP
 SRV_GUI		= 1
 endif
 
-
+APP_SNAKE_GAME ?= 0
+ifeq ($(APP_SNAKE_GAME), 1)
+CFLAGS		+= -DAPP_SNAKE_GAME
+SRV_GUI		= 1
+endif
 
 APP_IBUTTON ?= 0
 ifeq ($(APP_IBUTTON), 1)
@@ -239,6 +250,10 @@ endif
 SRV_RPC ?= 0
 ifeq ($(SRV_RPC), 1)
 CFLAGS		+= -DSRV_RPC
+ifeq ($(SRV_RPC_DEBUG), 1)
+CFLAGS		+= -DSRV_RPC_DEBUG
+endif
+SRV_CLI		= 1
 endif
 
 SRV_LOADER ?= 0

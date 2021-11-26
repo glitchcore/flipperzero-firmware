@@ -18,6 +18,8 @@ File* storage_file_alloc(Storage* storage);
  */
 void storage_file_free(File* file);
 
+FuriPubSub* storage_get_pubsub(Storage* storage);
+
 /******************* File Functions *******************/
 
 /** Opens an existing file or create a new one.
@@ -261,6 +263,22 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path);
  * @return true on success or if directory is already exist
  */
 bool storage_simply_mkdir(Storage* storage, const char* path);
+
+/**
+ * @brief Get next free filename.
+ * 
+ * @param storage
+ * @param dirname 
+ * @param filename 
+ * @param fileextension 
+ * @param nextfilename return name
+ */
+void storage_get_next_filename(
+    Storage* storage,
+    const char* dirname,
+    const char* filename,
+    const char* fileextension,
+    string_t nextfilename);
 
 #ifdef __cplusplus
 }

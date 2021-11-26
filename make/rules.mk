@@ -33,10 +33,14 @@ CHECK_AND_REINIT_SUBMODULES_SHELL=\
 $(info $(shell $(CHECK_AND_REINIT_SUBMODULES_SHELL)))
 
 all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu $(OBJ_DIR)/$(PROJECT).json
+	@:
 
-$(OBJ_DIR)/$(PROJECT).elf: $(OBJECTS)
+$(OBJ_DIR)/flipper.a: $(OBJECTS)
+	@$(AR) $@ $(OBJECTS)
+
+$(OBJ_DIR)/$(PROJECT).elf: $(OBJ_DIR)/flipper.a
 	@echo "\tLD\t" $@
-	@$(LD) $(LDFLAGS) $(OBJECTS) -o $@
+	@$(LD) $(LDFLAGS) $^ -o $@
 	@$(SZ) $@
 
 $(OBJ_DIR)/$(PROJECT).hex: $(OBJ_DIR)/$(PROJECT).elf
@@ -47,27 +51,28 @@ $(OBJ_DIR)/$(PROJECT).bin: $(OBJ_DIR)/$(PROJECT).elf
 	@echo "\tBIN\t" $@
 	@$(BIN) $< $@
 
-$(OBJ_DIR)/$(PROJECT).dfu: $(OBJ_DIR)/$(PROJECT).hex
+$(OBJ_DIR)/$(PROJECT).dfu: $(OBJ_DIR)/$(PROJECT).bin
 	@echo "\tDFU\t" $@
-	@hex2dfu \
-		-i $(OBJ_DIR)/$(PROJECT).hex \
+	@../scripts/bin2dfu.py \
+		-i $(OBJ_DIR)/$(PROJECT).bin \
 		-o $(OBJ_DIR)/$(PROJECT).dfu \
+		-a $(FLASH_ADDRESS) \
 		-l "Flipper Zero $(shell echo $(TARGET) | tr a-z A-Z)" > /dev/null
 
 $(OBJ_DIR)/$(PROJECT).json: $(OBJ_DIR)/$(PROJECT).dfu
 	@echo "\tJSON\t" $@
-	@python3 ../scripts/meta.py -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
+	@../scripts/meta.py generate -p $(PROJECT) $(CFLAGS) > $(OBJ_DIR)/$(PROJECT).json
 
 $(OBJ_DIR)/%.o: %.c $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tCC\t" $< "->" $@
+	@echo "\tCC\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.s $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tASM\t" $< "->" $@
+	@echo "\tASM\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
 	@$(AS) $(CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: %.cpp $(OBJ_DIR)/BUILD_FLAGS
-	@echo "\tCPP\t" $< "->" $@
+	@echo "\tCPP\t" $(subst $(PROJECT_ROOT)/,,$(realpath $<)) "->" $@
 	@$(CPP) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/flash: $(OBJ_DIR)/$(PROJECT).bin
@@ -100,7 +105,7 @@ debug_other:
 		-ex "svd_load $(SVD_FILE)" \
 
 
-blackmagic: flash
+blackmagic:
 	arm-none-eabi-gdb-py \
 		-ex 'target extended-remote $(BLACKMAGIC)' \
 		-ex 'monitor swdp_scan' \

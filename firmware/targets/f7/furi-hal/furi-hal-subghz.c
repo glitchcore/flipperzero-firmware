@@ -10,6 +10,8 @@
 #include <cc1101.h>
 #include <stdio.h>
 
+#define TAG "FuriHalSubGhz"
+
 static volatile SubGhzState furi_hal_subghz_state = SubGhzStateInit;
 static volatile SubGhzRegulation furi_hal_subghz_regulation = SubGhzRegulationTxRx;
 
@@ -303,7 +305,7 @@ void furi_hal_subghz_init() {
     cc1101_shutdown(device);
 
     furi_hal_spi_device_return(device);
-    FURI_LOG_I("FuriHalSubGhz", "Init OK");
+    FURI_LOG_I(TAG, "Init OK");
 }
 
 void furi_hal_subghz_sleep() {
@@ -467,7 +469,7 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     case FuriHalVersionRegionEuRu:
         //433,05..434,79; 868,15..868,55
         if(!(value >= 433050000 && value <= 434790000) &&
-           !(value >= 868150000 && value <= 8680550000)) {
+           !(value >= 868150000 && value <= 868550000)) {
         } else {
             txrx = true;
         }

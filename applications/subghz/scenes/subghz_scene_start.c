@@ -16,14 +16,14 @@ void subghz_scene_start_submenu_callback(void* context, uint32_t index) {
 
 void subghz_scene_start_on_enter(void* context) {
     SubGhz* subghz = context;
-    if(subghz->state_notifications == NOTIFICATION_STARTING_STATE) {
-        subghz->state_notifications = NOTIFICATION_IDLE_STATE;
+    if(subghz->state_notifications == SubGhzNotificationStateStarting) {
+        subghz->state_notifications = SubGhzNotificationStateIDLE;
     }
     submenu_add_item(
         subghz->submenu, "Read", SubmenuIndexRead, subghz_scene_start_submenu_callback, subghz);
     submenu_add_item(
         subghz->submenu,
-        "Read Raw",
+        "Read RAW",
         SubmenuIndexReadRAW,
         subghz_scene_start_submenu_callback,
         subghz);
@@ -57,6 +57,7 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexReadRAW) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexReadRAW);
+            subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
             return true;
         } else if(event.event == SubmenuIndexRead) {

@@ -1,5 +1,7 @@
 #include "view_dispatcher_i.h"
 
+#define TAG "ViewDispatcher"
+
 ViewDispatcher* view_dispatcher_alloc() {
     ViewDispatcher* view_dispatcher = furi_alloc(sizeof(ViewDispatcher));
 
@@ -197,12 +199,12 @@ void view_dispatcher_attach_to_gui(
     furi_assert(view_dispatcher->gui == NULL);
     furi_assert(gui);
 
-    if(type == ViewDispatcherTypeNone) {
-        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerNone);
+    if(type == ViewDispatcherTypeDesktop) {
+        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerDesktop);
+    } else if(type == ViewDispatcherTypeWindow) {
+        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerWindow);
     } else if(type == ViewDispatcherTypeFullscreen) {
         gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerFullscreen);
-    } else if(type == ViewDispatcherTypeWindow) {
-        gui_add_view_port(gui, view_dispatcher->view_port, GuiLayerMain);
     } else {
         furi_check(NULL);
     }
@@ -237,7 +239,7 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         view_dispatcher->ongoing_input &= ~key_bit;
     } else if(!(view_dispatcher->ongoing_input & key_bit)) {
         FURI_LOG_D(
-            "ViewDispatcher",
+            TAG,
             "non-complementary input, discarding key: %s, type: %s, sequence: %p",
             input_get_key_name(event->key),
             input_get_type_name(event->type),
@@ -276,7 +278,7 @@ void view_dispatcher_handle_input(ViewDispatcher* view_dispatcher, InputEvent* e
         }
     } else if(view_dispatcher->ongoing_input_view && event->type == InputTypeRelease) {
         FURI_LOG_D(
-            "ViewDispatcher",
+            TAG,
             "View changed while key press %p -> %p. Sending key: %s, type: %s, sequence: %p to previous view port",
             view_dispatcher->ongoing_input_view,
             view_dispatcher->current_view,

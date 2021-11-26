@@ -20,6 +20,7 @@ extern int32_t desktop_srv(void* p);
 extern int32_t accessor_app(void* p);
 extern int32_t archive_app(void* p);
 extern int32_t bad_usb_app(void* p);
+extern int32_t uart_echo_app(void* p);
 extern int32_t blink_test_app(void* p);
 extern int32_t bt_debug_app(void* p);
 extern int32_t delay_test_app(void* p);
@@ -41,7 +42,8 @@ extern int32_t vibro_test_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
-extern int32_t user_app_example(void* p);
+extern int32_t user_app_loader(void* p);
+extern int32_t snake_game_app(void* p);
 
 // On system start hooks declaration
 extern void bt_cli_init();
@@ -66,55 +68,55 @@ extern int32_t power_settings_app(void* p);
 const FlipperApplication FLIPPER_SERVICES[] = {
 /* Services */
 #ifdef SRV_RPC
-    {.app = rpc_srv, .name = "RPC", .stack_size = 1024 * 4, .icon = NULL},
+    {.app = rpc_srv, .name = "RpcSrv", .stack_size = 1024 * 4, .icon = NULL},
 #endif
 
 #ifdef SRV_BT
-    {.app = bt_srv, .name = "BT", .stack_size = 1024, .icon = NULL},
+    {.app = bt_srv, .name = "BtSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_CLI
-    {.app = cli_srv, .name = "Cli", .stack_size = 4096, .icon = NULL},
+    {.app = cli_srv, .name = "CliSrv", .stack_size = 4096, .icon = NULL},
 #endif
 
 #ifdef SRV_DIALOGS
-    {.app = dialogs_srv, .name = "Dialogs", .stack_size = 1024, .icon = NULL},
+    {.app = dialogs_srv, .name = "DialogsSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_DOLPHIN
-    {.app = dolphin_srv, .name = "Dolphin", .stack_size = 1024, .icon = NULL},
+    {.app = dolphin_srv, .name = "DolphinSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_DESKTOP
-    {.app = desktop_srv, .name = "Desktop", .stack_size = 1024, .icon = NULL},
+    {.app = desktop_srv, .name = "DesktopSrv", .stack_size = 2048, .icon = NULL},
 #endif
 
 #ifdef SRV_GUI
-    {.app = gui_srv, .name = "Gui", .stack_size = 8192, .icon = NULL},
+    {.app = gui_srv, .name = "GuiSrv", .stack_size = 2048, .icon = NULL},
 #endif
 
 #ifdef SRV_INPUT
-    {.app = input_srv, .name = "Input", .stack_size = 1024, .icon = NULL},
+    {.app = input_srv, .name = "InputSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_LOADER
-    {.app = loader_srv, .name = "Loader", .stack_size = 1024, .icon = NULL},
+    {.app = loader_srv, .name = "LoaderSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_NOTIFICATION
-    {.app = notification_srv, .name = "Notification", .stack_size = 1024, .icon = NULL},
+    {.app = notification_srv, .name = "NotificationSrv", .stack_size = 1536, .icon = NULL},
 #endif
 
 #ifdef SRV_POWER
-    {.app = power_srv, .name = "Power", .stack_size = 1024, .icon = NULL},
+    {.app = power_srv, .name = "PowerSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_POWER_OBSERVER
-    {.app = power_observer_srv, .name = "PowerObserver", .stack_size = 1024, .icon = NULL},
+    {.app = power_observer_srv, .name = "PowerAuditSrv", .stack_size = 1024, .icon = NULL},
 #endif
 
 #ifdef SRV_STORAGE
-    {.app = storage_srv, .name = "Storage", .stack_size = 4096, .icon = NULL},
+    {.app = storage_srv, .name = "StorageSrv", .stack_size = 3072, .icon = NULL},
 #endif
 };
 
@@ -205,7 +207,11 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 #endif
 
 #ifdef APP_USER_APP
-    {.app = user_app_example, .name = "User app example", .stack_size = 1024, .icon = &A_Plugins_14},
+    {.app = user_app_loader, .name = "User app loader", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
+
+#ifdef APP_SNAKE_GAME
+    {.app = snake_game_app, .name = "Snake Game", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 };
 
@@ -239,6 +245,10 @@ const FlipperApplication FLIPPER_DEBUG_APPS[] = {
 
 #ifdef APP_BAD_USB
     {.app = bad_usb_app, .name = "Bad USB test", .stack_size = 2048, .icon = NULL},
+#endif
+
+#ifdef APP_UART_ECHO
+    {.app = uart_echo_app, .name = "Uart Echo", .stack_size = 2048, .icon = NULL},
 #endif
 
 #ifdef APP_IRDA_MONITOR
