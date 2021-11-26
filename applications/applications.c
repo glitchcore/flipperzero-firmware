@@ -41,6 +41,7 @@ extern int32_t vibro_test_app(void* p);
 
 // Plugins
 extern int32_t music_player_app(void* p);
+extern int32_t user_app_example(void* p);
 
 // On system start hooks declaration
 extern void bt_cli_init();
@@ -201,6 +202,10 @@ const FlipperApplication FLIPPER_PLUGINS[] = {
 
 #ifdef APP_MUSIC_PLAYER
     {.app = music_player_app, .name = "Music Player", .stack_size = 1024, .icon = &A_Plugins_14},
+#endif
+
+#ifdef APP_USER_APP
+    {.app = user_app_example, .name = "User app example", .stack_size = 1024, .icon = &A_Plugins_14},
 #endif
 };
 

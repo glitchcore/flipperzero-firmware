@@ -35,6 +35,7 @@ APP_ABOUT	= 1
 
 # Plugins
 APP_MUSIC_PLAYER = 1
+APP_USER_APP = 1
 
 # Debug
 APP_ACCESSOR = 1
@@ -178,6 +179,13 @@ ifeq ($(APP_MUSIC_PLAYER), 1)
 CFLAGS		+= -DAPP_MUSIC_PLAYER
 SRV_GUI		= 1
 endif
+
+APP_USER_APP ?= 0
+ifeq ($(APP_USER_APP), 1)
+CFLAGS		+= -DAPP_USER_APP
+SRV_GUI		= 1
+endif
+
 
 
 APP_IBUTTON ?= 0
