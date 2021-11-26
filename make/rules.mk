@@ -35,12 +35,12 @@ $(info $(shell $(CHECK_AND_REINIT_SUBMODULES_SHELL)))
 all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).bin $(OBJ_DIR)/$(PROJECT).dfu $(OBJ_DIR)/$(PROJECT).json
 	@:
 
-$(OBJ_DIR)/flipper.a: $(OBJECTS)
+$(OBJ_DIR)/libflipper.a: $(OBJECTS)
 	@$(AR) $@ $(OBJECTS)
 
-$(OBJ_DIR)/$(PROJECT).elf: $(OBJ_DIR)/flipper.a
+$(OBJ_DIR)/$(PROJECT).elf: $(OBJ_DIR)/libflipper.a
 	@echo "\tLD\t" $@
-	@$(LD) $(LDFLAGS) $^ -o $@
+	@$(LD) -Wl,--whole-archive $^ -Wl,--no-whole-archive $(LDFLAGS) -o $@
 	@$(SZ) $@
 
 $(OBJ_DIR)/$(PROJECT).hex: $(OBJ_DIR)/$(PROJECT).elf

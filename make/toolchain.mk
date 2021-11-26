@@ -11,8 +11,9 @@ CPP	= $(PREFIX)g++ -std=gnu++17
 LD	= $(PREFIX)g++
 AS	= $(PREFIX)gcc -x assembler-with-cpp
 CP	= $(PREFIX)objcopy
+DUMP = $(PREFIX)objdump -d
 SZ	= $(PREFIX)size
-AR  = $(PREFIX)ar rcs
+AR  = $(PREFIX)ar -rcs
 HEX	= $(CP) -O ihex
 BIN	= $(CP) -O binary -S
 
