@@ -55,8 +55,8 @@ _Min_Stack_Size = 0x1000; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-FLASH (rx)                 : ORIGIN = 0x08008000, LENGTH = 992K
-USER_APP_FLASH (rx)                 : ORIGIN = 0x80ba000, LENGTH = 64K
+FLASH (rx)                 : ORIGIN = 0x08008000, LENGTH = 710K
+USER_APP_FLASH (rx)        : ORIGIN = 0x80ba000, LENGTH = 32K
 RAM1 (xrw)                 : ORIGIN = 0x20000008, LENGTH = 0x2FFF8
 RAM_SHARED (xrw)           : ORIGIN = 0x20030000, LENGTH = 10K
 }
@@ -175,6 +175,23 @@ SECTIONS
     __free_flash_start__ = .;
     . = ORIGIN(FLASH) + LENGTH(FLASH);
   } >FLASH
+
+  .userapp_text :
+  {
+    . = ALIGN(4);
+    *(.userapp_text)  /* .text sections (code) */
+    *(.userapp_text*) /* .text* sections (code) */
+    . = ALIGN(4);
+  } >USER_APP_FLASH
+
+  /* Constant data goes into FLASH */
+  .userapp_rodata :
+  {
+    . = ALIGN(4);
+    *(.userapp_rodata)         /* .rodata sections (constants, strings, etc.) */
+    *(.userapp_rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    . = ALIGN(4);
+  } >USER_APP_FLASH
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

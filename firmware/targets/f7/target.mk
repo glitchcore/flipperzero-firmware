@@ -37,7 +37,7 @@ CFLAGS += \
 	-DUSE_FULL_LL_DRIVER \
 	-DUSE_HAL_DRIVER \
 	-DHAVE_FREERTOS
-CFLAGS += \
+INCLUDES += \
 	-I$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Inc \
 	-I$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Inc/Legacy \
 	-I$(CUBE_DIR)/Drivers/CMSIS/Device/ST \
@@ -74,7 +74,7 @@ C_SOURCES += \
 	$(CUBE_DIR)/Drivers/STM32WBxx_HAL_Driver/Src/stm32wbxx_ll_utils.c
 
 # FreeRTOS
-CFLAGS += \
+INCLUDES += \
 	-I$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/include \
 	-I$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 \
 	-I$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F
@@ -89,7 +89,7 @@ C_SOURCES += \
 	$(CUBE_DIR)/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c
 
 # BLE glue 
-CFLAGS += \
+INCLUDES += \
 	-I$(TARGET_DIR)/ble-glue \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN \
 	-I$(CUBE_DIR)/Middlewares/ST/STM32_WPAN/ble \
@@ -143,11 +143,11 @@ CFLAGS += -DINVERT_RFID_IN
 endif
 
 FURI_HAL_DIR = $(TARGET_DIR)/furi-hal
-CFLAGS += -I$(FURI_HAL_DIR)
+INCLUDES += -I$(FURI_HAL_DIR)
 C_SOURCES += $(wildcard $(FURI_HAL_DIR)/*.c)
 
 # Other
-CFLAGS += \
+INCLUDES += \
 	-I$(MXPROJECT_DIR)/Inc \
 	-I$(MXPROJECT_DIR)/fatfs
 C_SOURCES += \
@@ -156,9 +156,9 @@ C_SOURCES += \
 
 # Linker options
 ifeq ($(NO_BOOTLOADER), 1)
-LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_no_bootloader.ld
+LDSCRIPT += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_no_bootloader.ld
 else
-LDFLAGS += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_with_bootloader.ld
+LDSCRIPT += -T$(MXPROJECT_DIR)/stm32wb55xx_flash_cm4_with_bootloader.ld
 endif
 
 SVD_FILE = ../debug/STM32WB55_CM4.svd
