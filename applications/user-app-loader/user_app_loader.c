@@ -35,7 +35,7 @@ static void handle_input(InputEvent* input_event, void* ctx) {
     osMessageQueuePut(event_queue, &event, 0, 0);
 }
 
-int32_t __attribute__((weak)) user_app(void* p) {
+int32_t user_app_example(void* p) {
     osMessageQueueId_t event_queue = osMessageQueueNew(8, sizeof(BlinkEvent), NULL);
 
     ViewPort* view_port = view_port_alloc();
@@ -65,10 +65,10 @@ int32_t __attribute__((weak)) user_app(void* p) {
     return 0;
 }
 
-int32_t user_app_wrapper(void* p) {
-    return user_app(p);
+int32_t __attribute__((__section__(".userapp_wrap"))) __attribute__((weak)) userapp_wrap(void* p) {
+    return user_app_example(p);
 }
 
 int32_t user_app_loader(void* p) {
-    return user_app_wrapper(p);
+    return userapp_wrap(p);
 }

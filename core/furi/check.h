@@ -11,7 +11,7 @@ extern "C" {
 #ifdef FURI_DEBUG
 #define furi_assert(__e) ((__e) ? (void)0 : furi_crash("furi_assert failed\r\n"))
 #else
-#define furi_assert(__e) ((void)0)
+#define furi_assert(__e) ((__e) ? (void)0 : (void)0)
 #endif
 
 /** Crash system */

@@ -55,8 +55,8 @@ _Min_Stack_Size = 0x1000; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-FLASH (rx)                 : ORIGIN = 0x08008000, LENGTH = 710K
-USER_APP_FLASH (rx)        : ORIGIN = 0x80ba000, LENGTH = 32K
+FLASH (rx)                 : ORIGIN = 0x08008000, LENGTH = 728K
+USER_APP_FLASH (rx)        : ORIGIN = 0x80be000, LENGTH = 48K
 RAM1 (xrw)                 : ORIGIN = 0x20000008, LENGTH = 0x2FFF8
 RAM_SHARED (xrw)           : ORIGIN = 0x20030000, LENGTH = 10K
 }
@@ -174,7 +174,15 @@ SECTIONS
   {
     __free_flash_start__ = .;
     . = ORIGIN(FLASH) + LENGTH(FLASH);
+    __free_flash_end__ = .;
   } >FLASH
+
+  .userapp_wrap :
+  {
+    . = ALIGN(4);
+    *(.userapp_wrap)
+    . = ALIGN(4);
+  } >USER_APP_FLASH
 
   .userapp_text :
   {

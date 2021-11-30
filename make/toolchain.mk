@@ -17,14 +17,14 @@ AR  = $(PREFIX)ar -rcs
 HEX	= $(CP) -O ihex
 BIN	= $(CP) -O binary -S
 
-DEBUG ?= 1
-COMPACT ?= 0
+DEBUG ?= 0
+COMPACT ?= 1
 ifeq ($(DEBUG), 1)
 CFLAGS += -DFURI_DEBUG -DNDEBUG -Og -g
 else ifeq ($(COMPACT), 1)
-CFLAGS += -DFURI_NDEBUG -DNDEBUG -Os
+CFLAGS += -DFURI_DEBUG -DNDEBUG -Os -g0
 else
-CFLAGS += -DFURI_NDEBUG -DNDEBUG -Og
+CFLAGS += -DFURI_DEBUG -DNDEBUG -Og -g0
 endif
 
 CFLAGS		+= -fdata-sections -ffunction-sections -fno-math-errno -fstack-usage -MMD -MP -MF"$(@:%.o=%.d)"

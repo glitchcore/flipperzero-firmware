@@ -41,6 +41,7 @@ all: $(OBJ_DIR)/$(PROJECT).elf $(OBJ_DIR)/$(PROJECT).hex $(OBJ_DIR)/$(PROJECT).b
 	@:
 
 $(OBJ_DIR)/libflipper.a: $(OBJECTS)
+	@echo $(CFLAGS)
 	@$(AR) $@ $(OBJECTS)
 
 $(OBJ_DIR)/$(PROJECT).elf: $(OBJ_DIR)/libflipper.a

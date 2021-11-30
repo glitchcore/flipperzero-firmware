@@ -15,6 +15,7 @@
 
 /* Free flash space borders, exported by linker */
 extern const void __free_flash_start__;
+extern const void __free_flash_end__;
 
 size_t furi_hal_flash_get_base() {
     return FLASH_BASE;
@@ -41,9 +42,7 @@ const void* furi_hal_flash_get_free_start_address() {
 }
 
 const void* furi_hal_flash_get_free_end_address() {
-    uint32_t sfr_reg_val = READ_REG(FLASH->SFR);
-    uint32_t sfsa = (READ_BIT(sfr_reg_val, FLASH_SFR_SFSA) >> FLASH_SFR_SFSA_Pos);
-    return (const void *)((sfsa * FLASH_PAGE_SIZE) + FLASH_BASE);
+    return &__free_flash_end__;
 }
 
 size_t furi_hal_flash_get_free_page_start_address() {

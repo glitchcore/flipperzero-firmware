@@ -10,6 +10,8 @@ else ifeq ($(OS), Darwin)
 NPROCS := $(shell sysctl -n hw.ncpu)
 endif
 
+DEBUG = 0
+
 include	$(PROJECT_ROOT)/make/defaults.mk
 
 .PHONY: all
